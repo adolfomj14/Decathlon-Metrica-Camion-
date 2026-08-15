@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="system">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Control de Descarga y Surtida — Decathlon La Flora</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#0082c3">
+  <meta name="description" content="Módulo para control de tiempos, productividad y analítica de descarga y surtida de mercancía en Decathlon La Flora.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230082c3'><path d='M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'/></svg>">
+
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+
+  <!-- Supabase JS & Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Estilos Principales -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Encabezado Fijo -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-section">
+        <div class="brand-icon">
+          <span class="material-symbols-outlined" style="font-size: 28px;">local_shipping</span>
+        </div>
+        <div class="brand-titles">
+          <h1>Control de Descarga y Surtida</h1>
+          <span>Decathlon La Flora</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button class="icon-btn" id="theme-toggle-btn" title="Cambiar Tema">
+          <span class="material-symbols-outlined">dark_mode</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Barra de Navegación por Pestañas -->
+  <nav class="nav-tabs-bar">
+    <div class="nav-tabs-container">
+      <button class="nav-tab active" data-view="view-dashboard">
+        <span class="material-symbols-outlined">dashboard</span>
+        Dashboard
+      </button>
+      <button class="nav-tab" data-view="view-form">
+        <span class="material-symbols-outlined">add_task</span>
+        Nuevo Registro
+      </button>
+      <button class="nav-tab" data-view="view-historial">
+        <span class="material-symbols-outlined">format_list_bulleted</span>
+        Historial Registros
+      </button>
+      <button class="nav-tab" data-view="view-permanentes">
+        <span class="material-symbols-outlined">badge</span>
+        Permanentes
+      </button>
+    </div>
+  </nav>
+
+  <!-- Contenedor Principal -->
+  <main class="main-content">
+
+    <!-- 1. VISTA: DASHBOARD PRINCIPAL -->
+    <section id="view-dashboard" class="view-panel">
+
+      <!-- Filtros del Dashboard -->
+      <div class="filter-card">
+        <div class="filter-grid">
+          <div class="filter-group">
+            <label for="filter-fecha-desde">Fecha Desde</label>
+            <input type="date" id="filter-fecha-desde" class="input-field">
+          </div>
+          <div class="filter-group">
+            <label for="filter-fecha-hasta">Fecha Hasta</label>
+            <input type="date" id="filter-fecha-hasta" class="input-field">
+          </div>
+          <div class="filter-group">
+            <label for="filter-permanente">Permanente</label>
+            <select id="filter-permanente" class="select-field">
+              <option value="todos">Todos los Permanentes</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-colaboradores">Colaboradores</label>
+            <select id="filter-colaboradores" class="select-field">
+              <option value="todos">Todos</option>
+              <option value="2">2 Personas</option>
+              <option value="3">3 Personas</option>
+              <option value="4">4 Personas</option>
+              <option value="5">5+ Personas</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-dia-semana">Día Semana</label>
+            <select id="filter-dia-semana" class="select-field">
+              <option value="todos">Todos los Días</option>
+              <option value="1">Lunes</option>
+              <option value="2">Martes</option>
+              <option value="3">Miércoles</option>
+              <option value="4">Jueves</option>
+              <option value="5">Viernes</option>
+              <option value="6">Sábado</option>
+              <option value="0">Domingo</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <button class="btn btn-outlined btn-sm" id="btn-reset-filters">
+              <span class="material-symbols-outlined" style="font-size:16px;">restart_alt</span> Restablecer
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarjetas KPI -->
+      <div id="kpi-container" class="kpi-grid"></div>
+
+      <!-- Gráficos de Analítica -->
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="material-symbols-outlined" style="color:var(--primary);">calendar_today</span>
+              Tiempo Promedio por Día de la Semana
+            </h2>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-tiempo-dia"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">
+              <span class="material-symbols-outlined" style="color:var(--success);">group_add</span>
+              Impacto de Colaboradores en el Tiempo y Rendimiento
+            </h2>
+          </div>
+          <div class="chart-container">
+            <canvas id="chart-colaboradores"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla Comparativa por Permanente -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-symbols-outlined" style="color:var(--secondary);">badge</span>
+            Rendimiento por Permanente
+          </h2>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="table-permanentes">
+            <thead>
+              <tr>
+                <th>Permanente</th>
+                <th>Registros</th>
+                <th>Tiempo Promedio</th>
+                <th>Cantidades Promedio</th>
+                <th>Cantidades / Hora</th>
+                <th>Colaboradores Promedio</th>
+                <th>Productividad / Colaboradores</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tabla por Número de Colaboradores -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-symbols-outlined" style="color:var(--info);">groups</span>
+            Rendimiento según Número de Colaboradores
+          </h2>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="table-colaboradores">
+            <thead>
+              <tr>
+                <th>Colaboradores</th>
+                <th>Registros</th>
+                <th>Cantidad Promedio</th>
+                <th>Tiempo Promedio</th>
+                <th>Cantidades / Hora</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Últimos Registros -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-symbols-outlined">history</span>
+            Últimos Registros de Descarga
+          </h2>
+        </div>
+        <div class="table-responsive">
+          <table class="data-table" id="table-recent">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Permanente</th>
+                <th>Horario</th>
+                <th>Duración</th>
+                <th>Cantidad</th>
+                <th>Colaboradores</th>
+                <th>Cant / Hora</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 2. VISTA: FORMULARIO REGISTRAR / EDITAR OPERACIÓN -->
+    <section id="view-form" class="view-panel hidden">
+      <div class="card" style="max-width: 700px; margin: 0 auto; width: 100%;">
+        <div class="card-header">
+          <h2 class="card-title" id="form-title">
+            <span class="material-symbols-outlined" style="color:var(--primary);">edit_note</span>
+            Registrar Operación de Descarga y Surtida
+          </h2>
+          <button type="button" class="btn btn-outlined btn-sm hidden" id="btn-cancel-edit">
+            <span class="material-symbols-outlined" style="font-size:16px;">cancel</span>
+            Cancelar Edición
+          </button>
+        </div>
+
+        <form id="form-registro" style="display:flex; flex-direction:column; gap:18px;">
+          <div class="filter-group">
+            <label for="reg-permanente">Permanente Responsable *</label>
+            <select id="reg-permanente" class="select-field" required>
+              <option value="">-- Seleccionar Permanente --</option>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+            <div class="filter-group">
+              <label for="reg-fecha">Fecha *</label>
+              <input type="date" id="reg-fecha" class="input-field" required>
+            </div>
+            <div class="filter-group">
+              <label for="reg-hora-inicio">Hora Inicio (Edición de tiempo) *</label>
+              <input type="time" id="reg-hora-inicio" class="input-field" required>
+            </div>
+            <div class="filter-group">
+              <label for="reg-hora-fin">Hora Finalización (Edición de tiempo) *</label>
+              <input type="time" id="reg-hora-fin" class="input-field" required>
+            </div>
+          </div>
+
+          <div id="calculated-time-badge" style="font-size:0.9rem; font-weight:600; padding:8px 12px; background:var(--primary-light); border-radius:var(--radius-sm); color:var(--primary);"></div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px;">
+            <div class="filter-group">
+              <label for="reg-cantidad">Cantidad Recibida (Unidades/Mercancía) *</label>
+              <input type="number" id="reg-cantidad" class="input-field" placeholder="Ej: 300" min="1" required>
+            </div>
+
+            <div class="filter-group">
+              <label for="reg-colaboradores">Colaboradores Participantes (Personas) *</label>
+              <input type="number" id="reg-colaboradores" class="input-field" placeholder="Ej: 3" min="1" value="3" required>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <label for="reg-observaciones">Observaciones / Novedades (Opcional)</label>
+            <textarea id="reg-observaciones" class="input-field" rows="3" placeholder="Registra eventos especiales que afectaron el tiempo..."></textarea>
+            
+            <div class="chip-container">
+              <span class="chip chip-obs" data-obs="Camión llegó tarde">Camión llegó tarde</span>
+              <span class="chip chip-obs" data-obs="Faltó personal">Faltó personal</span>
+              <span class="chip chip-obs" data-obs="Mercancía voluminosa">Mercancía voluminosa</span>
+              <span class="chip chip-obs" data-obs="Mercancía difícil de segregar">Difícil de segregar</span>
+              <span class="chip chip-obs" data-obs="Cambio de operación">Cambio de operación</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="btn-save-registro" style="margin-top:10px;">
+            <span class="material-symbols-outlined">save</span>
+            Guardar Registro
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. VISTA: HISTORIAL COMPLETO -->
+    <section id="view-historial" class="view-panel hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-symbols-outlined" style="color:var(--primary);">view_list</span>
+            Historial General de Procesos
+          </h2>
+
+          <div style="width: 250px;">
+            <input type="text" id="historial-search-input" class="input-field" placeholder="Buscar en historial...">
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="table-historial">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Permanente</th>
+                <th>Inicio</th>
+                <th>Fin</th>
+                <th>Tiempo Total</th>
+                <th>Cantidad</th>
+                <th>Colaboradores</th>
+                <th>Cant / Hora</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. VISTA: PERMANENTES -->
+    <section id="view-permanentes" class="view-panel hidden">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <span class="material-symbols-outlined" style="color:var(--primary);">manage_accounts</span>
+            Administración de Permanentes
+          </h2>
+          <button class="btn btn-primary btn-sm" id="btn-add-permanente">
+            <span class="material-symbols-outlined">person_add</span> Nuevo Permanente
+          </button>
+        </div>
+
+        <div id="permanentes-grid-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px;"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: NUEVO PERMANENTE -->
+  <div id="modal-permanente" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size:1.1rem; font-weight:700;">Administrar Permanente</h3>
+        <button class="icon-btn" id="btn-close-modal-perm">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="form-permanente">
+        <div class="modal-body">
+          <div class="filter-group">
+            <label for="perm-nombre">Nombre Completo *</label>
+            <input type="text" id="perm-nombre" class="input-field" placeholder="Ej: Juan Pérez" required>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="perm-activo" checked>
+            <label for="perm-activo" style="font-size:0.9rem; cursor:pointer;">Permanente Activo</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAR ELIMINACIÓN DE PERMANENTE CON CONTRASEÑA -->
+  <div id="modal-delete-permanente" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom-color: rgba(239, 68, 68, 0.2);">
+        <h3 style="font-size:1.1rem; font-weight:700; color:var(--danger); display:flex; align-items:center; gap:8px;">
+          <span class="material-symbols-outlined">warning</span> Eliminar Colaborador / Permanente
+        </h3>
+        <button class="icon-btn" id="btn-close-modal-delete-perm" type="button">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="form-delete-permanente">
+        <div class="modal-body">
+          <p style="font-size:0.95rem; color:var(--text-main); line-height:1.5;">
+            ¿Estás seguro de que deseas eliminar a <strong id="delete-perm-name-label" style="color:var(--danger);"></strong>?
+          </p>
+          <div style="background:var(--bg-color); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:12px; font-size:0.85rem; color:var(--text-muted); display:flex; gap:8px;">
+            <span class="material-symbols-outlined" style="color:var(--warning); font-size:20px; flex-shrink:0;">shield</span>
+            <div>
+              <strong>Protección contra eliminación accidental:</strong><br>
+              Para proteger los registros históricos y estadísticas, ingresa la contraseña de autorización para confirmar la eliminación.
+            </div>
+          </div>
+          
+          <div class="filter-group">
+            <label for="delete-perm-password">Contraseña de Seguridad *</label>
+            <input type="password" id="delete-perm-password" class="input-field" placeholder="Ingresa la contraseña" required autocomplete="current-password">
+            <small style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Contraseña predeterminada de autorización: <strong>Eliminar</strong></small>
+          </div>
+          <div id="delete-perm-error" style="color:var(--danger); font-size:0.85rem; font-weight:600;" class="hidden">
+            ⚠️ Contraseña incorrecta. Inténtalo de nuevo.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outlined btn-sm" id="btn-cancel-delete-perm">Cancelar</button>
+          <button type="submit" class="btn btn-danger btn-sm" id="btn-confirm-delete-perm">
+            <span class="material-symbols-outlined" style="font-size:16px;">delete_forever</span> Confirmar y Eliminar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Scripts JS -->
+  <script src="js/supabase.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
