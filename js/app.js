@@ -23,17 +23,115 @@ document.addEventListener('DOMContentLoaded', () => {
   // INICIALIZACIÓN
   // ---------------------------------------------------------------------------
 
-  async function init() {
-    AppUI.initElements();
-    initTheme();
-    bindTabNavigation();
-    bindFormEvents();
-    bindFilterEvents();
-    bindPermanenteEvents();
-    registerServiceWorker();
+    async function init() {
+  // Inicializar elementos de la aplicación
+  AppUI.initElements();
 
-    await loadDataAndRender();
+  // Inicializar tema
+  initTheme();
+
+  // Configurar eventos
+  bindTabNavigation();
+  bindFormEvents();
+  bindFilterEvents();
+  bindPermanenteEvents();
+  registerServiceWorker();
+
+  // Comprobar autenticación antes de cargar los datos
+  await inicializarAutenticacion();
   }
+
+// ---------------------------------------------------------------------------
+// AUTENTICACIÓN
+// ---------------------------------------------------------------------------
+
+async function inicializarAutenticacion() {
+  const loginScreen = document.getElementById('login-screen');
+  const loginForm = document.getElementById('login-form');
+  const loginError = document.getElementById('login-error');
+  const loginBtn = document.getElementById('login-btn');
+
+  // Ocultar la aplicación mientras comprobamos la sesión
+  document.querySelector('.app-header')?.classList.add('hidden');
+  document.querySelector('main')?.classList.add('hidden');
+
+  try {
+    const session = await obtenerSesion();
+
+    if (session) {
+      // Ya hay una sesión activa
+      loginScreen?.classList.add('hidden');
+
+      document.querySelector('.app-header')?.classList.remove('hidden');
+      document.querySelector('main')?.classList.remove('hidden');
+
+      await loadDataAndRender();
+      return;
+    }
+
+    // No hay sesión: mostrar login
+    loginScreen?.classList.remove('hidden');
+
+  } catch (error) {
+    console.error('[Auth] Error comprobando sesión:', error);
+    loginScreen?.classList.remove('hidden');
+  }
+
+  // Evento del formulario de login
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById('login-email')?.value.trim();
+    const password = document.getElementById('login-password')?.value;
+
+    if (!email || !password) {
+      mostrarErrorLogin('Introduce tu correo y contraseña.');
+      return;
+    }
+
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = `
+      <span class="material-symbols-outlined">progress_activity</span>
+      Iniciando sesión...
+    `;
+
+    loginError?.classList.add('hidden');
+
+    try {
+      await iniciarSesion(email, password);
+
+      // Login correcto
+      loginScreen?.classList.add('hidden');
+
+      document.querySelector('.app-header')?.classList.remove('hidden');
+      document.querySelector('main')?.classList.remove('hidden');
+
+      await loadDataAndRender();
+
+    } catch (error) {
+      console.error('[Auth] Error iniciando sesión:', error);
+
+      mostrarErrorLogin(
+        'Correo o contraseña incorrectos.'
+      );
+
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = `
+        <span class="material-symbols-outlined">login</span>
+        Iniciar sesión
+      `;
+    }
+  });
+}
+
+function mostrarErrorLogin(mensaje) {
+  const loginError = document.getElementById('login-error');
+
+  if (!loginError) return;
+
+  loginError.textContent = mensaje;
+  loginError.classList.remove('hidden');
+}
 
   // ---------------------------------------------------------------------------
   // TEMA Y APARIENCIA

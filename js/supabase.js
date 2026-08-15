@@ -4,8 +4,8 @@
  */
 
 // Credenciales por defecto (Configurables según el entorno del usuario)
-const SUPABASE_URL = window.SUPABASE_URL || 'https://su-proyecto-supabase.supabase.co';
-const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'tu-anon-key-aqui';
+const SUPABASE_URL = window.SUPABASE_URL || 'https://wzgsledagaglmmxdxits.supabase.co';
+const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'sb_publishable_LoxCHbkB9sew-gj-UlVSOA_bLPxpdSy';
 
 (function initSupabase() {
   try {
@@ -27,3 +27,51 @@ const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'tu-anon-key-aqui';
     window.supabaseClient = null;
   }
 })();
+
+// ==========================================
+// AUTENTICACIÓN SUPABASE
+// ==========================================
+
+async function iniciarSesion(email, password) {
+  if (!window.supabaseClient) {
+    throw new Error('Supabase no está conectado.');
+  }
+
+  const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+    email: email,
+    password: password
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
+
+async function cerrarSesion() {
+  if (!window.supabaseClient) {
+    return;
+  }
+
+  const { error } = await window.supabaseClient.auth.signOut();
+
+  if (error) {
+    throw error;
+  }
+}
+
+async function obtenerSesion() {
+  if (!window.supabaseClient) {
+    return null;
+  }
+
+  const { data, error } = await window.supabaseClient.auth.getSession();
+
+  if (error) {
+    console.error('[Auth] Error obteniendo sesión:', error);
+    return null;
+  }
+
+  return data.session;
+}

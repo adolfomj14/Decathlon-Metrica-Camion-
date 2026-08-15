@@ -28,6 +28,56 @@
 </head>
 <body>
 
+  <!-- PANTALLA DE LOGIN -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+
+      <div class="login-icon">
+        <span class="material-symbols-outlined">local_shipping</span>
+      </div>
+
+      <h1>Control de Descarga y Surtida</h1>
+      <p>Decathlon La Flora</p>
+
+      <form id="login-form">
+        <div class="filter-group">
+          <label for="login-email">Correo electrónico</label>
+          <input
+            type="email"
+            id="login-email"
+            class="input-field"
+            placeholder="correo@ejemplo.com"
+            required
+            autocomplete="email"
+          >
+        </div>
+
+        <div class="filter-group">
+          <label for="login-password">Contraseña</label>
+          <input
+            type="password"
+            id="login-password"
+            class="input-field"
+            placeholder="Contraseña"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+
+        <div id="login-error" class="hidden"></div>
+
+        <button type="submit" class="btn btn-primary" id="login-btn">
+          <span class="material-symbols-outlined">login</span>
+          Iniciar sesión
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- Encabezado Fijo -->
+  <header class="app-header">
+
   <!-- Encabezado Fijo -->
   <header class="app-header">
     <div class="header-container">

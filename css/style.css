@@ -588,3 +588,396 @@ body {
 @media (max-width: 480px) {
   .kpi-grid { grid-template-columns: 1fr; }
 }
+
+
+/* =============================================================================
+   LOGIN — Diseño visual
+   Solo afecta a la pantalla de autenticación
+   ============================================================================= */
+
+.login-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(0, 130, 195, 0.18),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(0, 47, 108, 0.16),
+      transparent 40%
+    ),
+    linear-gradient(
+      135deg,
+      #eef7fb 0%,
+      #f7fafc 50%,
+      #edf4f8 100%
+    );
+
+  overflow-y: auto;
+}
+
+/* Fondo del login en modo oscuro */
+[data-theme="dark"] .login-screen {
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(0, 130, 195, 0.22),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(0, 47, 108, 0.25),
+      transparent 40%
+    ),
+    linear-gradient(
+      135deg,
+      #071525 0%,
+      #0f172a 55%,
+      #111c2d 100%
+    );
+}
+
+/* Tarjeta */
+.login-card {
+  width: 100%;
+  max-width: 430px;
+
+  padding: 42px 40px 38px;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 22px;
+
+  box-shadow:
+    0 24px 60px rgba(0, 47, 108, 0.12),
+    0 4px 14px rgba(0, 0, 0, 0.05);
+
+  text-align: center;
+
+  animation: loginCardIn 0.45s ease-out;
+}
+
+/* Tarjeta modo oscuro */
+[data-theme="dark"] .login-card {
+  background: rgba(30, 41, 59, 0.96);
+  border-color: rgba(71, 85, 105, 0.7);
+
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.4),
+    0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* Animación de entrada */
+@keyframes loginCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Icono */
+.login-icon {
+  width: 76px;
+  height: 76px;
+
+  margin: 0 auto 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 22px;
+
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    var(--secondary)
+  );
+
+  color: #ffffff;
+
+  box-shadow:
+    0 10px 24px rgba(0, 130, 195, 0.25);
+
+  transform: translateZ(0);
+}
+
+.login-icon .material-symbols-outlined {
+  font-size: 40px;
+  font-variation-settings:
+    'FILL' 1,
+    'wght' 500,
+    'GRAD' 0,
+    'opsz' 40;
+}
+
+/* Título */
+.login-card h1 {
+  margin: 0;
+
+  color: var(--text-main);
+
+  font-size: 1.55rem;
+  line-height: 1.2;
+  font-weight: 800;
+
+  letter-spacing: -0.025em;
+}
+
+/* Subtítulo */
+.login-card > p {
+  margin: 8px 0 30px;
+
+  color: var(--text-muted);
+
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+/* Formulario */
+#login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+
+  text-align: left;
+}
+
+/* Grupos del login */
+#login-form .filter-group {
+  gap: 7px;
+}
+
+/* Labels */
+#login-form .filter-group label {
+  color: var(--text-main);
+
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* Inputs */
+#login-form .input-field {
+  min-height: 50px;
+
+  padding: 12px 14px;
+
+  border: 1px solid var(--border-color);
+  border-radius: 11px;
+
+  background-color: var(--bg-color);
+  color: var(--text-main);
+
+  font-family: inherit;
+  font-size: 0.92rem;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* Placeholder */
+#login-form .input-field::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+/* Focus */
+#login-form .input-field:focus {
+  outline: none;
+
+  background-color: var(--surface);
+
+  border-color: var(--primary);
+
+  box-shadow:
+    0 0 0 3px var(--primary-light);
+}
+
+/* Botón de login */
+#login-btn {
+  width: 100%;
+  min-height: 50px;
+
+  margin-top: 4px;
+
+  border: none;
+  border-radius: 11px;
+
+  background: linear-gradient(
+    135deg,
+    var(--primary),
+    #006da5
+  );
+
+  color: #ffffff;
+
+  font-size: 0.92rem;
+  font-weight: 700;
+
+  box-shadow:
+    0 7px 16px rgba(0, 130, 195, 0.22);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+/* Hover */
+#login-btn:hover {
+  background: linear-gradient(
+    135deg,
+    #0094dc,
+    var(--primary)
+  );
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 10px 22px rgba(0, 130, 195, 0.28);
+}
+
+/* Click */
+#login-btn:active {
+  transform: translateY(0);
+  box-shadow:
+    0 4px 10px rgba(0, 130, 195, 0.2);
+}
+
+/* Icono del botón */
+#login-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+/* Error de login */
+#login-error:not(.hidden) {
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+
+  padding: 11px 13px;
+
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 10px;
+
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--danger);
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  animation: loginErrorIn 0.2s ease-out;
+}
+
+@keyframes loginErrorIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estado de foco accesible */
+#login-form .input-field:focus-visible,
+#login-btn:focus-visible {
+  outline: 3px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   LOGIN — MÓVIL
+   ============================================================ */
+
+@media (max-width: 480px) {
+
+  .login-screen {
+    align-items: center;
+    padding: 18px;
+  }
+
+  .login-card {
+    max-width: 100%;
+
+    padding: 34px 24px 30px;
+
+    border-radius: 18px;
+  }
+
+  .login-icon {
+    width: 68px;
+    height: 68px;
+
+    margin-bottom: 19px;
+
+    border-radius: 19px;
+  }
+
+  .login-icon .material-symbols-outlined {
+    font-size: 35px;
+  }
+
+  .login-card h1 {
+    font-size: 1.35rem;
+  }
+
+  .login-card > p {
+    margin-bottom: 26px;
+  }
+
+  #login-form .input-field,
+  #login-btn {
+    min-height: 52px;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-height: 650px) and (max-width: 480px) {
+
+  .login-screen {
+    align-items: flex-start;
+    padding-top: 20px;
+  }
+
+  .login-card {
+    padding-top: 28px;
+    padding-bottom: 24px;
+  }
+
+  .login-icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: 14px;
+  }
+
+  .login-icon .material-symbols-outlined {
+    font-size: 30px;
+  }
+
+  .login-card > p {
+    margin-bottom: 20px;
+  }
+}
